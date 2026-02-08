@@ -6,25 +6,29 @@ if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 $error = "";
-
-if(isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']) {
-    if (isset($_POST['title']) && isset($_POST['description'])) {
-        if($_POST['title']=="" || $_POST['description']==""){
-            $error = "Please enter title and description";
-        } else {
-            $title = $_POST['title'];
-            $description = $_POST['description'];
-            $sql = "INSERT INTO list (title, description) VALUES (?, ?)";
-            $stmt = $connection->prepare($sql);
-            $stmt->bind_param("ss", $title, $description);
-            if ($stmt->execute()) {
-                header("Location: index.php");
+try {
+    if(isset($_POST['csrf_token']) && $_POST['csrf_token'] === $_SESSION['csrf_token']) {
+        if (isset($_POST['title']) && isset($_POST['description'])) {
+            if($_POST['title']=="" || $_POST['description']==""){
+                $error = "Please enter title and description";
             } else {
-                echo "Error: " . $sql . "<br>" . $connection->error;
+                $title = $_POST['title'];
+                $description = $_POST['description'];
+                $sql = "INSERT INTO list (title, description) VALUES (?, ?)";
+                $stmt = $connection->prepare($sql);
+                $stmt->bind_param("ss", $title, $description);
+                if ($stmt->execute()) {
+                    header("Location: index.php");
+                } else {
+                    echo "Error: " . $sql . "<br>" . $connection->error;
+                }
             }
         }
     }
+} catch (Exception $th) {
+    $error = "something went wrong";
 }
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
